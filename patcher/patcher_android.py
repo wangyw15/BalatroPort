@@ -1,8 +1,7 @@
 import re
-from pathlib import Path
 
 
-def remove_steam(code: str) -> str:
+def patch_main_lua(code: str) -> str:
     """
     Remove the steam API from the code.
     :param code: code to remove the steam API from
@@ -50,21 +49,14 @@ def remove_steam(code: str) -> str:
     return "\n".join(patched_code_lines)
 
 
-def patch_game(extracted_dir: Path | str) -> None:
-    """
-    Patch the game to run independently.
-    :param extracted_dir: directory to patch
-    """
-    if isinstance(extracted_dir, str):
-        extracted_dir = Path(extracted_dir)
+def patch_globals_lua(code: str) -> str:
+    original_code_lines = code.split("\n")
+    patched_code_lines: list[str] = []
 
-    with open(extracted_dir / "main.lua", "r") as main_file:
-        code = main_file.read()
-    patched_code = remove_steam(code)
-    with open(extracted_dir / "main.lua", "w") as main_file:
-        main_file.write(patched_code)
+    for line in original_code_lines:
+        if re.fullmatch(r"\s*loadstring\(\S*\)\(\)\s*", line):
+            patched_code_lines.append("--" + line)
+        else:
+            patched_code_lines.append(line)
 
-
-__all__ = [
-    "patch_game"
-]
+    return "\n".join(patched_code_lines)
