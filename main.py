@@ -9,7 +9,7 @@ if __name__ == "__main__":
     with open("game.love", "wb") as love_file:
         love_file.write(get_game_data(exe))
     unpack("game.love")
-    patch_game("game")
+    patch_game("game", "android")
     os.remove("game.love")
     repack("game")
     shutil.rmtree("game")

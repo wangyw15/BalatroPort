@@ -1,21 +1,31 @@
 from importlib import import_module
-from pkgutil import iter_modules
 from pathlib import Path
+from pkgutil import iter_modules
+from types import ModuleType
 
 
-def get_patchers() -> dict[str, callable([[str], str])]:
+def get_patchers() -> dict[str, ModuleType]:
     """
-    Get all patch functions from the patcher module.
-    "__" is interpreted as /
-    "_" is interpreted as .
-    :return: dict with patcher target file as key and patch function as value
+    Get patchers.
+    :return: dict with patcher name as key and patcher module as value
     """
     for _, module_name, _ in iter_modules([str(Path(__file__).parent)]):
         if module_name.startswith("patcher_"):
             current_patcher = import_module(f"{Path(__file__).parent.name}.{module_name}")
-            for member_name, member in current_patcher.__dict__.items():
-                if member_name.startswith("patch_") and callable(member):
-                    yield [member_name[6:].replace("__", "/").replace("_", "."), member]
+            yield module_name[8:], current_patcher
+
+
+def get_patches(patcher: ModuleType) -> dict[str, callable([[str], str])]:
+    """
+    Get all patch functions from the patcher module.
+    "__" is interpreted as /
+    "_" is interpreted as .
+    :param patcher: patcher module
+    :return: dict with patcher target file as key and patch function as value
+    """
+    for member_name, member in patcher.__dict__.items():
+        if member_name.startswith("patch_") and callable(member):
+            yield member_name[6:].replace("__", "/").replace("_", "."), member
 
 
 def patch_file(file_path: Path | str, patch_function: callable([[str], str])) -> None:
@@ -34,16 +44,20 @@ def patch_file(file_path: Path | str, patch_function: callable([[str], str])) ->
         f.write(patched_code)
 
 
-def patch_game(extracted_dir: Path | str) -> None:
+def patch_game(extracted_dir: Path | str, patcher_name: str) -> None:
     """
     Patch the game to run independently.
+    :param patcher_name: patcher to use
     :param extracted_dir: directory to patch
     """
     if isinstance(extracted_dir, str):
         extracted_dir = Path(extracted_dir)
 
-    patchers = get_patchers()
-    for patcher_target, patcher in patchers:
+    patchers = dict(get_patchers())
+    if patcher_name not in patchers:
+        raise ValueError(f"Unknown patcher: {patcher_name}")
+    patches = get_patches(patchers[patcher_name])
+    for patcher_target, patcher in patches:
         patch_file(extracted_dir / patcher_target, patcher)
 
 
