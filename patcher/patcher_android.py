@@ -26,3 +26,16 @@ def patch_globals_lua(code: str) -> str:
             patched_code_lines.append(line)
 
     return "\n".join(patched_code_lines)
+
+
+def patch_conf_lua(code: str) -> str:
+    original_code_lines = code.split("\n")
+    patched_code_lines: list[str] = []
+
+    for line in original_code_lines:
+        patched_code_lines.append(line)
+        if re.fullmatch(r"\s*function\s+love\.conf\s*\(\s*t\s*\)\s*", line):
+            # save in /sdcard/Android/data
+            patched_code_lines.append("\tt.externalstorage = true")
+
+    return "\n".join(patched_code_lines)
