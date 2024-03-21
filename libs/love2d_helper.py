@@ -3,6 +3,7 @@ from os import PathLike
 from pathlib import Path
 from typing import BinaryIO, IO
 
+# https://github.com/love2d/love/blob/681d694f9df1b23d22b8bbb592e0913802da28c0/src/libraries/physfs/physfs_archiver_zip.c#L590
 PK_SIGNATURE = b'PK\x05\x06'
 
 
@@ -60,18 +61,34 @@ def seek_zip(file_io: BinaryIO) -> None:
     file_io.seek(start, 0)
 
 
-def get_game_data(executable: Path | str) -> bytes:
+def get_game_data(executable_path: Path | str) -> bytes:
     """
     Read the love data from the executable.
-    :param executable: path to the executable
+    :param executable_path: path to the executable
     :return: love data
     """
-    if isinstance(executable, str):
-        executable = Path(executable)
+    if isinstance(executable_path, str):
+        executable_path = Path(executable_path)
 
-    with executable.open("rb") as executable:
-        seek_zip(executable)
-        return executable.read()
+    with executable_path.open("rb") as executable_file:
+        seek_zip(executable_file)
+        return executable_file.read()
+
+
+def get_game_executable(executable_path: Path | str) -> bytes:
+    """
+    Read the executable without game data from the executable.
+    :param executable_path: path to the executable
+    :return: love executable
+    """
+    if isinstance(executable_path, str):
+        executable_path = Path(executable_path)
+
+    with executable_path.open("rb") as executable_file:
+        seek_zip(executable_file)
+        executable_length = executable_file.tell() - 1
+        executable_file.seek(0, 0)
+        return executable_file.read(executable_length)
 
 
 def unpack(love_file: str | PathLike[str] | IO[bytes], extract_dir: Path | str | None = None) -> None:

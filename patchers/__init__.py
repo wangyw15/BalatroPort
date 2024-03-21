@@ -5,14 +5,16 @@ from types import ModuleType
 from typing import Iterator
 
 
-def get_patcher_names() -> Iterator[str]:
+def get_patcher_names() -> list[str]:
     """
     Get patcher names.
     :return: list of patcher names
     """
+    ret: list[str] = []
     for _, module_name, _ in iter_modules([str(Path(__file__).parent)]):
         if module_name.startswith("patcher_"):
-            yield module_name[8:]
+            ret.append(module_name[8:])
+    return ret
 
 
 def get_patchers() -> dict[str, ModuleType]:
