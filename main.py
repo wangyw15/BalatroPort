@@ -1,12 +1,10 @@
 import argparse
-import os
 import shutil
-from pathlib import Path
 from io import BytesIO
+from pathlib import Path
 
-import love2d_helper
-import util
-import patcher
+import patchers
+from libs import love2d_helper, util
 
 parser = argparse.ArgumentParser(description="Balatro Patcher")
 
@@ -16,7 +14,7 @@ parser.add_argument("-i", "--input",
                     required=True)
 parser.add_argument("-p", "--patcher",
                     type=str,
-                    help="Patcher to use, available patchers: " + ", ".join(patcher.get_patcher_names()),
+                    help="Patcher to use, available patchers: " + ", ".join(patchers.get_patcher_names()),
                     required=False,
                     nargs="+")
 parser.add_argument("-o", "--output",
@@ -28,13 +26,13 @@ args = parser.parse_args()
 
 if __name__ == "__main__":
     executable_path = Path(args.input)
-    patchers: list[str] = args.patcher or []
+    selected_patchers: list[str] = args.patcher or []
     output_path = Path(args.output)
 
     love_data = love2d_helper.get_game_data(executable_path)
 
     # apply patchers
-    if patchers:
+    if selected_patchers:
         temp_dir = Path(util.random_string())
         temp_dir.mkdir(exist_ok=False)
 
@@ -42,9 +40,9 @@ if __name__ == "__main__":
             print("Extracting game data...")
             love2d_helper.unpack(love_data_io, temp_dir)
 
-        for patcher_name in patchers:
+        for patcher_name in selected_patchers:
             print(f"Patching with {patcher_name}...")
-            patcher.patch_game(temp_dir, patcher_name)
+            patchers.patch_game(temp_dir, patcher_name)
 
         with BytesIO() as love_data_io:
             print("Repacking game data...")
