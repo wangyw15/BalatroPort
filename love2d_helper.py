@@ -1,6 +1,7 @@
 import zipfile
+from os import PathLike
 from pathlib import Path
-from typing import BinaryIO
+from typing import BinaryIO, IO
 
 PK_SIGNATURE = b'PK\x05\x06'
 
@@ -73,10 +74,10 @@ def get_game_data(executable: Path | str) -> bytes:
         return executable.read()
 
 
-def unpack(love_file: Path | str, extract_dir: Path | str | None = None) -> None:
+def unpack(love_file: str | PathLike[str] | IO[bytes], extract_dir: Path | str | None = None) -> None:
     """
     Extract the contents of a .love file to a directory.
-    :param love_file: path to the .love file
+    :param love_file: content or path of the .love file
     :param extract_dir: directory to extract to
     """
     if isinstance(love_file, str):
@@ -94,7 +95,7 @@ def unpack(love_file: Path | str, extract_dir: Path | str | None = None) -> None
         zip_file.extractall(extract_dir)
 
 
-def repack(extracted_dir: Path | str, love_file: Path | str | None = None) -> None:
+def repack(extracted_dir: Path | str, love_file: str | PathLike[str] | IO[bytes] | None = None) -> None:
     """
     Repack the contents of a directory to a .love file.
     :param extracted_dir: directory to pack
@@ -104,7 +105,7 @@ def repack(extracted_dir: Path | str, love_file: Path | str | None = None) -> No
         extracted_dir = Path(extracted_dir)
 
     if love_file is None:
-        love_file = extracted_dir.parent / "game.love"
+        love_file = extracted_dir / "game.love"
     elif isinstance(love_file, str):
         love_file = Path(love_file)
 
@@ -115,5 +116,7 @@ def repack(extracted_dir: Path | str, love_file: Path | str | None = None) -> No
 
 
 __all__ = [
-    "get_game_data"
+    "get_game_data",
+    "unpack",
+    "repack",
 ]
