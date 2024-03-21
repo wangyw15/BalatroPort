@@ -39,3 +39,40 @@ def patch_conf_lua(code: str) -> str:
             patched_code_lines.append("\tt.externalstorage = true")
 
     return "\n".join(patched_code_lines)
+
+
+def patch_main_lua(code: str) -> str:
+    # force landscape mode
+    original_code_lines = code.split("\n")
+    patched_code_lines: list[str] = []
+
+    for line in original_code_lines:
+        patched_code_lines.append(line)
+        if re.fullmatch(r"\s*function\s+love\.load\(\s*\)\s*", line):
+            patched_code_lines.append("""
+	-- force landscape mode
+	local width, height, flags = love.window.getMode()
+	flags.resizable = false
+	love.window.setMode(width, height, flags)
+            """.lstrip("\n").rstrip(" "))
+
+    patched_code_lines.append("""
+-- force landscape mode
+function love.displayrotated(index, orientation)
+	local os = love.system.getOS()
+	if os == "Android" or os == "iOS" then
+		if orientation == "portrait" or "portraitflipped" then
+		local width, height, flags = love.window.getMode()
+			if index == flags.display then
+				if height > width then
+					-- just to make sure
+					flags.resizable = false
+					love.window.setMode(height, width, flags)
+				end
+			end
+		end
+	end
+end
+    """.lstrip("\n").rstrip(" "))
+
+    return "\n".join(patched_code_lines)
