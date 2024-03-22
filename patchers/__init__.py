@@ -33,15 +33,15 @@ def get_patchers() -> dict[str, ModuleType]:
 def get_patches(patcher: ModuleType) -> dict[str, callable([[str], str])]:
     """
     Get all patch functions from the patcher module.
-    "__" is interpreted as /
-    "_" is interpreted as .
+    "___" is interpreted as /
+    "__" is interpreted as .
     :param patcher: patcher module
     :return: dict with patcher target file as key and patch function as value
     """
     ret: dict[str, callable([[str], str])] = {}
     for member_name, member in patcher.__dict__.items():
         if member_name.startswith("patch_") and callable(member):
-            ret[member_name[6:].replace("__", "/").replace("_", ".")] = member
+            ret[member_name[6:].replace("___", "/").replace("__", ".")] = member
     return ret
 
 
