@@ -79,6 +79,8 @@ end
 
 
 def patch_functions___UI_definitions__lua(code: str) -> str:
+    # quit button still raise problems
+    return str
     # add quit button to the option menu
     original_code_lines = code.split("\n")
     patched_code_lines: list[str] = []
