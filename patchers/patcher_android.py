@@ -1,7 +1,8 @@
 import re
+from os import PathLike
 
 
-def patch_globals__lua(code: str) -> str:
+def patch_globals__lua(code: str, working_dir: str | PathLike[str]) -> str:
     original_code_lines = code.split("\n")
     patched_code_lines: list[str] = []
 
@@ -28,7 +29,7 @@ def patch_globals__lua(code: str) -> str:
     return "\n".join(patched_code_lines)
 
 
-def patch_conf__lua(code: str) -> str:
+def patch_conf__lua(code: str, working_dir: str | PathLike[str]) -> str:
     original_code_lines = code.split("\n")
     patched_code_lines: list[str] = []
 
@@ -41,7 +42,7 @@ def patch_conf__lua(code: str) -> str:
     return "\n".join(patched_code_lines)
 
 
-def patch_main__lua(code: str) -> str:
+def patch_main__lua(code: str, working_dir: str | PathLike[str]) -> str:
     # force landscape mode
     original_code_lines = code.split("\n")
     patched_code_lines: list[str] = []
@@ -78,9 +79,9 @@ end
     return "\n".join(patched_code_lines)
 
 
-def patch_functions___UI_definitions__lua(code: str) -> str:
+def patch_functions___UI_definitions__lua(code: str, working_dir: str | PathLike[str]) -> str:
     # quit button still raise problems
-    return str
+    return code
     # add quit button to the option menu
     original_code_lines = code.split("\n")
     patched_code_lines: list[str] = []

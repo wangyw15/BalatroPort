@@ -1,7 +1,5 @@
-import zipfile
-from os import PathLike
 from pathlib import Path
-from typing import BinaryIO, IO
+from typing import BinaryIO
 
 # https://github.com/love2d/love/blob/681d694f9df1b23d22b8bbb592e0913802da28c0/src/libraries/physfs/physfs_archiver_zip.c#L590
 PK_SIGNATURE = b'PK\x05\x06'
@@ -91,49 +89,6 @@ def get_game_executable(executable_path: Path | str) -> bytes:
         return executable_file.read(executable_length)
 
 
-def unpack(love_file: str | PathLike[str] | IO[bytes], extract_dir: Path | str | None = None) -> None:
-    """
-    Extract the contents of a .love file to a directory.
-    :param love_file: content or path of the .love file
-    :param extract_dir: directory to extract to
-    """
-    if isinstance(love_file, str):
-        love_file = Path(love_file)
-
-    if extract_dir is None:
-        extract_dir = love_file.parent / "game"
-    elif isinstance(extract_dir, str):
-        extract_dir = Path(extract_dir)
-
-    if not zipfile.is_zipfile(love_file):
-        raise ValueError("Not a valid zip file.")
-
-    with zipfile.ZipFile(love_file, "r") as zip_file:
-        zip_file.extractall(extract_dir)
-
-
-def repack(extracted_dir: Path | str, love_file: str | PathLike[str] | IO[bytes] | None = None) -> None:
-    """
-    Repack the contents of a directory to a .love file.
-    :param extracted_dir: directory to pack
-    :param love_file: path to the .love file
-    """
-    if isinstance(extracted_dir, str):
-        extracted_dir = Path(extracted_dir)
-
-    if love_file is None:
-        love_file = extracted_dir / "game.love"
-    elif isinstance(love_file, str):
-        love_file = Path(love_file)
-
-    with zipfile.ZipFile(love_file, "w") as zip_file:
-        for file in extracted_dir.rglob("*"):
-            if file.is_file():
-                zip_file.write(file, file.relative_to(extracted_dir))
-
-
 __all__ = [
     "get_game_data",
-    "unpack",
-    "repack",
 ]

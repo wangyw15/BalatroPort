@@ -3,6 +3,7 @@ import shutil
 from io import BytesIO
 from pathlib import Path
 
+import libs.util
 import patchers
 from libs import love2d_helper, util
 
@@ -47,23 +48,25 @@ if __name__ == "__main__":
                 raise ValueError(f'Patcher "{patcher_name}" not found.\n'
                                  f'Available patchers: {", ".join(patchers.get_patcher_names())}')
 
-        temp_dir = Path(util.random_string())
-        temp_dir.mkdir(exist_ok=False)
+        working_dir = Path(f"balatro_{util.random_string()}")
+        working_dir.mkdir(exist_ok=False)
+        uncompressed_game_dir = working_dir / "game"
+        uncompressed_game_dir.mkdir(exist_ok=False)
 
         with BytesIO(love_data) as love_data_io:
             print("Extracting game data...")
-            love2d_helper.unpack(love_data_io, temp_dir)
+            libs.util.uncompress(love_data_io, uncompressed_game_dir)
 
         for patcher_name in selected_patchers:
             print(f"Patching with {patcher_name}...")
-            patchers.patch_game(temp_dir, patcher_name)
+            patchers.patch_game(working_dir, patcher_name)
 
         with BytesIO() as love_data_io:
             print("Repacking game data...")
-            love2d_helper.repack(temp_dir, love_data_io)
+            libs.util.compress(uncompressed_game_dir, love_data_io)
             love_data = love_data_io.getvalue()
 
-        shutil.rmtree(temp_dir)
+        shutil.rmtree(working_dir)
 
     if output_type == "exe":
         executable_data = love2d_helper.get_game_executable(executable_path)
