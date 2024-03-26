@@ -8,12 +8,15 @@ import requests
 from libs import util
 
 
+STEAMODDED_VERSION = "0.8.1"
+
+
 def download_steamodded(download_path: str | PathLike[str]) -> None:
     """
     Download the Steamodded repository.
     :param download_path: path to download the repository to
     """
-    url = "https://github.com/Steamopollys/Steamodded/archive/refs/heads/main.zip"
+    url = f"https://github.com/Steamopollys/Steamodded/archive/refs/tags/{STEAMODDED_VERSION}.zip"
 
     if isinstance(download_path, str):
         download_path = Path(download_path)
@@ -48,8 +51,8 @@ def patch_main__lua(code: str, working_dir: str | PathLike[str]) -> str:
 
     directories = ["core", "debug", "loader"]
 
-    steamodded_file = working_dir / "steamodded.zip"
-    steamodded_dir = working_dir / "Steamodded-main"
+    steamodded_file = working_dir / f"steamodded-{STEAMODDED_VERSION}.zip"
+    steamodded_dir = working_dir / f"Steamodded-{STEAMODDED_VERSION}"
 
     if not steamodded_dir.exists():
         if not steamodded_file.exists():
