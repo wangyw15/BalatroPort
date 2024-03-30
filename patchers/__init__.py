@@ -1,8 +1,12 @@
+import shutil
 from importlib import import_module
+from io import BytesIO
 from os import PathLike
 from pathlib import Path
 from pkgutil import iter_modules
 from types import ModuleType
+
+from libs import util, love2d_helper
 
 
 def get_patcher_names() -> list[str]:
@@ -64,7 +68,7 @@ def patch_file(file_path: Path | str,
         f.write(patched_code)
 
 
-def patch_game(working_dir: Path | str, patcher_name: str) -> None:
+def patch_extracted_game(working_dir: Path | str, patcher_name: str) -> None:
     """
     Patch the game to run independently.
     :param patcher_name: patcher to use
@@ -81,7 +85,79 @@ def patch_game(working_dir: Path | str, patcher_name: str) -> None:
         patch_file(working_dir / "game" / patcher_target, patcher, working_dir)
 
 
+def patch_game_data(game_data: bytes, selected_patchers: list[str] | None = None) -> bytes:
+    """
+    Patch the game to run independently.
+    :param game_data: game data
+    :param selected_patchers: patchers to use
+    """
+    if selected_patchers is None:
+        selected_patchers = []
+
+    working_dir = Path(f"balatro_{util.random_string()}")
+    working_dir.mkdir(exist_ok=False)
+    uncompressed_game_dir = working_dir / "game"
+    uncompressed_game_dir.mkdir(exist_ok=False)
+
+    with BytesIO(game_data) as love_data_io:
+        print("Extracting game data...")
+        util.uncompress(love_data_io, uncompressed_game_dir)
+
+    for patcher_name in selected_patchers:
+        print(f"Patching with {patcher_name}...")
+        patch_extracted_game(working_dir, patcher_name)
+
+    with BytesIO() as love_data_io:
+        print("Repacking game data...")
+        util.compress(uncompressed_game_dir, love_data_io)
+        patched_game_data = love_data_io.getvalue()
+
+    shutil.rmtree(working_dir)
+    return patched_game_data
+
+
+def patch_executable(executable_path: Path | str,
+                     output_path: Path | str,
+                     selected_patchers: list[str] | None = None,
+                     output_type: str = "exe") -> None:
+    """
+    Patch the game to run independently.
+    :param executable_path: executable path
+    :param output_path: output path
+    :param selected_patchers: patchers to use
+    :param output_type: output type
+    """
+    if selected_patchers is None:
+        selected_patchers = []
+
+    if isinstance(executable_path, str):
+        executable_path = Path(executable_path)
+    if isinstance(output_path, str):
+        output_path = Path(output_path)
+
+    if not executable_path.exists():
+        raise FileNotFoundError("Executable not found.")
+    if output_type not in love2d_helper.VALID_OUTPUT_TYPES:
+        raise ValueError(f'Invalid output type "{output_type}".\n'
+                         f'Available output types: "{", ".join(love2d_helper.VALID_OUTPUT_TYPES)}')
+
+    love_data = love2d_helper.get_game_data(executable_path)
+
+    # apply patchers
+    if selected_patchers:
+        love_data = patch_game_data(love_data, selected_patchers)
+
+    if output_type == "exe":
+        executable_data = love2d_helper.get_game_executable(executable_path)
+        with output_path.open("wb") as output_file:
+            output_file.write(executable_data + love_data)
+    elif output_type in ["love", "zip"]:
+        with output_path.open("wb") as output_file:
+            output_file.write(love_data)
+
+
 __all__ = [
-    "patch_game",
+    "patch_executable",
+    "patch_game_data",
     "get_patcher_names"
 ]
