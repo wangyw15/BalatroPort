@@ -83,7 +83,7 @@ def game_save():
                 fo.write(compressed)
 
 
-if __name__ == "__main__":
+def main():
     if args.subcommand == "patcher":
         patcher()
     elif args.subcommand == "game-save":
@@ -92,3 +92,7 @@ if __name__ == "__main__":
         import gui
 
         gui.run()
+
+
+if __name__ == "__main__":
+    main()
