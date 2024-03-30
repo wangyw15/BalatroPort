@@ -71,7 +71,7 @@ class Window:
             elif event == "Patch":
                 executable_path = Path(values["executable_path"])
                 selected_patchers: list[str] = []
-                output_path = Path(values['save_path'])
+                output_path = Path(values["save_path"])
                 output_type = output_path.suffix[1:].lower()
 
                 # get selected patchers and output type
@@ -86,13 +86,17 @@ class Window:
                     sg.PopupError("Executable not found.", title="File not found")
                     continue
                 if output_type not in love2d_helper.VALID_OUTPUT_TYPES:
-                    sg.PopupError(f'Invalid output type "{output_type}".\n'
-                                  f'Available output types: "{", ".join(love2d_helper.VALID_OUTPUT_TYPES)}',
-                                  title="Invalid type")
+                    sg.PopupError(
+                        f'Invalid output type "{output_type}".\n'
+                        f'Available output types: "{", ".join(love2d_helper.VALID_OUTPUT_TYPES)}',
+                        title="Invalid type",
+                    )
                     continue
 
                 # apply patchers
-                patchers.patch_executable(executable_path, output_path, selected_patchers, output_type)
+                patchers.patch_executable(
+                    executable_path, output_path, selected_patchers, output_type
+                )
 
                 sg.Popup("Patching complete", title="Success")
 

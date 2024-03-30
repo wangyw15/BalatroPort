@@ -17,11 +17,15 @@ def patch_main__lua(code: str, working_dir: str | PathLike[str]) -> str:
         if re.fullmatch(r"\s*function\s+love\.load\(\s*\)\s*", line):
             function_love_load = True
 
-        if (function_love_load and
-                re.fullmatch(r"\s*if\s+os\s+==\s+'OS X'\s+or\s+os\s+==\s+'Windows'\s+then\s*", line)):
+        if function_love_load and re.fullmatch(
+            r"\s*if\s+os\s+==\s+'OS X'\s+or\s+os\s+==\s+'Windows'\s+then\s*", line
+        ):
             patched_code_lines.append("--" + line)
-            patched_code_lines.append(re.compile(r"os\s+==\s+'OS X'\s+or\s+os\s+==\s+'Windows'")
-                                        .sub("false", line))
+            patched_code_lines.append(
+                re.compile(r"os\s+==\s+'OS X'\s+or\s+os\s+==\s+'Windows'").sub(
+                    "false", line
+                )
+            )
             function_love_load = False
             continue
         patched_code_lines.append(line)

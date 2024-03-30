@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import BinaryIO
 
 # https://github.com/love2d/love/blob/681d694f9df1b23d22b8bbb592e0913802da28c0/src/libraries/physfs/physfs_archiver_zip.c#L590
-PK_SIGNATURE = b'PK\x05\x06'
+PK_SIGNATURE = b"PK\x05\x06"
 VALID_OUTPUT_TYPES = ["exe", "love", "zip"]
 
 

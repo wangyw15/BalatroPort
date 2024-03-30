@@ -29,12 +29,16 @@ def get_patchers() -> dict[str, ModuleType]:
     ret: dict[str, ModuleType] = {}
     for _, module_name, _ in iter_modules([str(Path(__file__).parent)]):
         if module_name.startswith("patcher_"):
-            current_patcher = import_module(f"{Path(__file__).parent.name}.{module_name}")
+            current_patcher = import_module(
+                f"{Path(__file__).parent.name}.{module_name}"
+            )
             ret[module_name[8:]] = current_patcher
     return ret
 
 
-def get_patches(patcher: ModuleType) -> dict[str, callable([[str, PathLike[str]], str])]:
+def get_patches(
+    patcher: ModuleType,
+) -> dict[str, callable([[str, PathLike[str]], str])]:
     """
     Get all patch functions from the patcher module.
     "___" is interpreted as /
@@ -49,9 +53,11 @@ def get_patches(patcher: ModuleType) -> dict[str, callable([[str, PathLike[str]]
     return ret
 
 
-def patch_file(file_path: Path | str,
-               patch_function: callable([[str, PathLike[str]], str]),
-               working_dir: Path | str) -> None:
+def patch_file(
+    file_path: Path | str,
+    patch_function: callable([[str, PathLike[str]], str]),
+    working_dir: Path | str,
+) -> None:
     """
     Patch a file using a patch function.
     :param file_path: file to patch
@@ -85,7 +91,9 @@ def patch_extracted_game(working_dir: Path | str, patcher_name: str) -> None:
         patch_file(working_dir / "game" / patcher_target, patcher, working_dir)
 
 
-def patch_game_data(game_data: bytes, selected_patchers: list[str] | None = None) -> bytes:
+def patch_game_data(
+    game_data: bytes, selected_patchers: list[str] | None = None
+) -> bytes:
     """
     Patch the game to run independently.
     :param game_data: game data
@@ -116,10 +124,12 @@ def patch_game_data(game_data: bytes, selected_patchers: list[str] | None = None
     return patched_game_data
 
 
-def patch_executable(executable_path: Path | str,
-                     output_path: Path | str,
-                     selected_patchers: list[str] | None = None,
-                     output_type: str = "exe") -> None:
+def patch_executable(
+    executable_path: Path | str,
+    output_path: Path | str,
+    selected_patchers: list[str] | None = None,
+    output_type: str = "exe",
+) -> None:
     """
     Patch the game to run independently.
     :param executable_path: executable path
@@ -138,8 +148,10 @@ def patch_executable(executable_path: Path | str,
     if not executable_path.exists():
         raise FileNotFoundError("Executable not found.")
     if output_type not in love2d_helper.VALID_OUTPUT_TYPES:
-        raise ValueError(f'Invalid output type "{output_type}".\n'
-                         f'Available output types: "{", ".join(love2d_helper.VALID_OUTPUT_TYPES)}')
+        raise ValueError(
+            f'Invalid output type "{output_type}".\n'
+            f'Available output types: "{", ".join(love2d_helper.VALID_OUTPUT_TYPES)}'
+        )
 
     love_data = love2d_helper.get_game_data(executable_path)
 
@@ -156,8 +168,4 @@ def patch_executable(executable_path: Path | str,
             output_file.write(love_data)
 
 
-__all__ = [
-    "patch_executable",
-    "patch_game_data",
-    "get_patcher_names"
-]
+__all__ = ["patch_executable", "patch_game_data", "get_patcher_names"]

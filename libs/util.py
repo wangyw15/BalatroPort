@@ -16,7 +16,9 @@ def random_string(length: int = 10) -> str:
     return md5(str(datetime.now()).encode()).hexdigest()[:length]
 
 
-def compress(directory: Path | str, zip_file: str | PathLike[str] | IO[bytes] | None = None) -> None:
+def compress(
+    directory: Path | str, zip_file: str | PathLike[str] | IO[bytes] | None = None
+) -> None:
     """
     Compress the contents of a directory.
     :param directory: directory to compress
@@ -36,7 +38,9 @@ def compress(directory: Path | str, zip_file: str | PathLike[str] | IO[bytes] | 
                 zip_file.write(file, file.relative_to(directory))
 
 
-def uncompress(zip_file: str | PathLike[str] | IO[bytes], directory: Path | str | None = None) -> None:
+def uncompress(
+    zip_file: str | PathLike[str] | IO[bytes], directory: Path | str | None = None
+) -> None:
     """
     Extract the contents of a zip file.
     :param zip_file: path to the zip file

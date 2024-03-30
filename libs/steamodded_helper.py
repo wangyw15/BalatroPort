@@ -18,7 +18,9 @@ def get_latest_release_version() -> str:
     return ""
 
 
-def download_steamodded(download_path: str | PathLike[str], version: str | None = None) -> None:
+def download_steamodded(
+    download_path: str | PathLike[str], version: str | None = None
+) -> None:
     """
     Download the Steamodded repository.
     :param download_path: path to download the repository to

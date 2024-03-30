@@ -6,20 +6,30 @@ from libs import love2d_helper, game_save_helper
 
 parser = argparse.ArgumentParser(description="Balatro Helper")
 
-subparsers = parser.add_subparsers(title="Subcommands", description="Available subcommands", dest="subcommand")
+subparsers = parser.add_subparsers(
+    title="Subcommands", description="Available subcommands", dest="subcommand"
+)
 
 patcher_parser = subparsers.add_parser("patcher", help="Patcher")
-patcher_parser.add_argument("-p", "--patcher",
-                            type=str,
-                            help="Patcher to use, available patchers: " + ", ".join(patchers.get_patcher_names()),
-                            required=False,
-                            nargs="+")
+patcher_parser.add_argument(
+    "-p",
+    "--patcher",
+    type=str,
+    help="Patcher to use, available patchers: "
+    + ", ".join(patchers.get_patcher_names()),
+    required=False,
+    nargs="+",
+)
 patcher_parser.add_argument("input", help="Path to Balatro.exe", type=str)
 patcher_parser.add_argument("output", help="Output path", type=str)
 
 game_save_parser = subparsers.add_parser("game-save", help="Game save helper")
-game_save_parser.add_argument("-d", "--dump", help="Dump the save file", action="store_true")
-game_save_parser.add_argument("-p", "--pack", help="Pack the save file", action="store_true")
+game_save_parser.add_argument(
+    "-d", "--dump", help="Dump the save file", action="store_true"
+)
+game_save_parser.add_argument(
+    "-p", "--pack", help="Pack the save file", action="store_true"
+)
 game_save_parser.add_argument("input", help="Path to the save file", type=str)
 game_save_parser.add_argument("output", help="Path to the output file", type=str)
 
@@ -35,13 +45,17 @@ def patcher():
     if not executable_path.exists():
         raise FileNotFoundError("Executable not found.")
     if output_type not in love2d_helper.VALID_OUTPUT_TYPES:
-        raise ValueError(f'Invalid output type "{output_type}".\n'
-                         f'Available output types: "{", ".join(love2d_helper.VALID_OUTPUT_TYPES)}')
+        raise ValueError(
+            f'Invalid output type "{output_type}".\n'
+            f'Available output types: "{", ".join(love2d_helper.VALID_OUTPUT_TYPES)}'
+        )
 
     love_data = love2d_helper.get_game_data(executable_path)
 
     # apply patchers
-    patchers.patch_executable(executable_path, output_path, selected_patchers, output_type)
+    patchers.patch_executable(
+        executable_path, output_path, selected_patchers, output_type
+    )
 
 
 def game_save():
@@ -76,4 +90,5 @@ if __name__ == "__main__":
         game_save()
     else:
         import gui
+
         gui.run()

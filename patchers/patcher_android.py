@@ -11,7 +11,9 @@ def patch_globals__lua(code: str, working_dir: str | PathLike[str]) -> str:
             # enable the game to run on mobile
             patched_code_lines.append("--" + line)
             # mobile settings
-            patched_code_lines.append("\n".join(""""
+            patched_code_lines.append(
+                "\n".join(
+                    """"
     if love.system.getOS() == 'Android' or love.system.getOS() == 'iOS' then
         self.F_DISCORD = false
         self.F_SAVE_TIMER = 5
@@ -22,7 +24,13 @@ def patch_globals__lua(code: str, working_dir: str | PathLike[str]) -> str:
         self.F_QUIT_BUTTON = false
     end
 
-            """.split("\n")[1:-1]))
+            """.split(
+                        "\n"
+                    )[
+                        1:-1
+                    ]
+                )
+            )
         else:
             patched_code_lines.append(line)
 
@@ -50,14 +58,21 @@ def patch_main__lua(code: str, working_dir: str | PathLike[str]) -> str:
     for line in original_code_lines:
         patched_code_lines.append(line)
         if re.fullmatch(r"\s*function\s+love\.load\(\s*\)\s*", line):
-            patched_code_lines.append("""
+            patched_code_lines.append(
+                """
 	-- force landscape mode
 	local width, height, flags = love.window.getMode()
 	flags.resizable = false
 	love.window.setMode(width, height, flags)
-            """.lstrip("\n").rstrip(" "))
+            """.lstrip(
+                    "\n"
+                ).rstrip(
+                    " "
+                )
+            )
 
-    patched_code_lines.append("""
+    patched_code_lines.append(
+        """
 -- force landscape mode
 function love.displayrotated(index, orientation)
 	local os = love.system.getOS()
@@ -74,12 +89,19 @@ function love.displayrotated(index, orientation)
 		end
 	end
 end
-    """.lstrip("\n").rstrip(" "))
+    """.lstrip(
+            "\n"
+        ).rstrip(
+            " "
+        )
+    )
 
     return "\n".join(patched_code_lines)
 
 
-def patch_functions___UI_definitions__lua(code: str, working_dir: str | PathLike[str]) -> str:
+def patch_functions___UI_definitions__lua(
+    code: str, working_dir: str | PathLike[str]
+) -> str:
     # quit button still raise problems
     return code
     # add quit button to the option menu
@@ -89,9 +111,11 @@ def patch_functions___UI_definitions__lua(code: str, working_dir: str | PathLike
     for line in original_code_lines:
         patched_code_lines.append(line)
         if re.search(r"UIBox_button.*b_stats", line):
-            patched_code_lines.append("  local exit_button = UIBox_button{ label = {localize('b_quit_cap')}, button = 'quit', minw = 5}")
+            patched_code_lines.append(
+                "  local exit_button = UIBox_button{ label = {localize('b_quit_cap')}, button = 'quit', minw = 5}"
+            )
         elif re.fullmatch(r"\s*credits\s*", line):
-            patched_code_lines[-1] += ','
+            patched_code_lines[-1] += ","
             patched_code_lines.append("exit_button")
 
     return "\n".join(patched_code_lines)

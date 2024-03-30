@@ -38,7 +38,7 @@ def patch_main__lua(code: str, working_dir: str | PathLike[str]) -> str:
 
     result = code
     for directory in directories:
-        result += '\n' + read_code_from_directory(steamodded_dir / directory)
+        result += "\n" + read_code_from_directory(steamodded_dir / directory)
 
     return result
 
