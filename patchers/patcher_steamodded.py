@@ -3,30 +3,7 @@ import re
 from os import PathLike
 from pathlib import Path
 
-import requests
-
-from libs import util
-
-
-STEAMODDED_VERSION = "0.8.1"
-
-
-def download_steamodded(download_path: str | PathLike[str]) -> None:
-    """
-    Download the Steamodded repository.
-    :param download_path: path to download the repository to
-    """
-    url = f"https://github.com/Steamopollys/Steamodded/archive/refs/tags/{STEAMODDED_VERSION}.zip"
-
-    if isinstance(download_path, str):
-        download_path = Path(download_path)
-
-    print("Downloading Steamodded...")
-    with requests.get(url) as response:
-        response.raise_for_status()
-
-        with download_path.open("wb") as file:
-            file.write(response.content)
+from libs import util, steamodded_helper as steamodded
 
 
 def read_code_from_directory(directory: str | PathLike[str]) -> str:
@@ -51,12 +28,12 @@ def patch_main__lua(code: str, working_dir: str | PathLike[str]) -> str:
 
     directories = ["core", "debug", "loader"]
 
-    steamodded_file = working_dir / f"steamodded-{STEAMODDED_VERSION}.zip"
-    steamodded_dir = working_dir / f"Steamodded-{STEAMODDED_VERSION}"
+    steamodded_file = working_dir / f"steamodded.zip"
+    steamodded_dir = working_dir / f"Steamodded"
 
     if not steamodded_dir.exists():
         if not steamodded_file.exists():
-            download_steamodded(steamodded_file)
+            steamodded.download_steamodded(steamodded_file)
         util.uncompress(steamodded_file, working_dir)
 
     result = code
