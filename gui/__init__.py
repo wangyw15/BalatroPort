@@ -1,110 +1,116 @@
-import ctypes
-import platform
-
-import PySimpleGUI as sg
-
-import patchers
+import sys
 from pathlib import Path
 
+from PySide6.QtWidgets import (
+    QApplication,
+    QWidget,
+    QPushButton,
+    QGridLayout,
+    QLabel,
+    QFileDialog,
+    QCheckBox,
+    QLineEdit,
+    QRadioButton,
+    QMessageBox,
+)
+
+import patchers
 from libs import love2d_helper
 
 
-class Window:
+class Window(QWidget):
     def __init__(self):
-        self.layout = [
-            [sg.Text("Select patchers")],
-            [sg.Checkbox(x, key=f"patcher_{x}") for x in patchers.get_patcher_names()],
-            [sg.Text("Select Balatro.exe")],
-            [
-                sg.InputText(key="executable_path", readonly=True, enable_events=True),
-                sg.FileBrowse(
-                    "Browse", file_types=(("Balatro.exe", ".exe"),), enable_events=True
-                ),
-            ],
-            [sg.Text("Save type")],
-            [
-                sg.Radio(
-                    x,
-                    0,
-                    key=f"save_type_{x}",
-                    default=(x == love2d_helper.VALID_OUTPUT_TYPES[0]),
-                )
-                for x in love2d_helper.VALID_OUTPUT_TYPES
-            ],
-            [sg.Text("Path to save")],
-            [
-                sg.InputText(key="save_path", readonly=True, enable_events=True),
-                sg.FileSaveAs(
-                    "Save",
-                    file_types=(
-                        ("Executable file", ".exe"),
-                        ("Zipped game", ".love .zip"),
-                    ),
-                    enable_events=True,
-                ),
-            ],
-            [sg.Button("Patch"), sg.Exit()],
-        ]
+        super().__init__()
+        self.setWindowTitle("Balatro helper")
 
-    def show(self):
-        window = sg.Window("Balatro helper", self.layout)
+        self.layout = QGridLayout(self)
+        self.edit_executable_path = QLineEdit()
+        self.button_browse_executable = QPushButton("Browse")
+        self.edit_save_path = QLineEdit()
+        self.button_browse_save = QPushButton("Browse")
+        self.button_patch = QPushButton("Patch")
+        self.checkbox_patchers = []
+        self.checkbox_output_types = []
 
-        while True:
-            event, values = window.read()
-            if event == sg.WIN_CLOSED or event == "Exit":
-                break
-            elif event == "executable_path":
-                executable_path = Path(values["executable_path"])
+        for i, patcher_name in enumerate(patchers.get_patcher_names()):
+            self.checkbox_patchers.append(QCheckBox(patcher_name))
+            self.layout.addWidget(self.checkbox_patchers[i], 1, i)
+        for i, output_type in enumerate(love2d_helper.VALID_OUTPUT_TYPES):
+            self.checkbox_output_types.append(QRadioButton(output_type))
+            self.layout.addWidget(self.checkbox_output_types[i], 5, i)
+            if i == 0:
+                self.checkbox_output_types[i].setChecked(True)
 
-                save_type = love2d_helper.VALID_OUTPUT_TYPES[0]
-                for k, v in values.items():
-                    if k.startswith("save_type_") and v:
-                        save_type = k[10:]
-                        break
+        self.layout.addWidget(
+            QLabel("Select patchers"), 0, 0, 1, self.layout.columnCount()
+        )
+        self.layout.addWidget(
+            QLabel("Select Balatro.exe"), 2, 0, 1, self.layout.columnCount()
+        )
+        self.layout.addWidget(
+            self.edit_executable_path, 3, 0, 1, self.layout.columnCount() - 1
+        )
+        self.layout.addWidget(
+            self.button_browse_executable, 3, self.layout.columnCount() - 1
+        )
+        self.layout.addWidget(QLabel("Save type"), 4, 0, 1, self.layout.columnCount())
+        self.layout.addWidget(
+            QLabel("Path to save"), 6, 0, 1, self.layout.columnCount()
+        )
+        self.layout.addWidget(
+            self.edit_save_path, 7, 0, 1, self.layout.columnCount() - 1
+        )
+        self.layout.addWidget(self.button_browse_save, 7, self.layout.columnCount() - 1)
+        self.layout.addWidget(self.button_patch, 8, 0, 1, self.layout.columnCount())
 
-                window["save_path"].update(
-                    executable_path.parent
-                    / f"{executable_path.stem}_patched.{save_type}"
-                )
-            elif event == "save_path":
-                window[f"save_type_{Path(values['save_path']).suffix[1:]}"].update(True)
-            elif event == "Patch":
-                executable_path = Path(values["executable_path"])
-                selected_patchers: list[str] = []
-                output_path = Path(values["save_path"])
-                output_type = output_path.suffix[1:].lower()
+        self.button_browse_executable.clicked.connect(self.browse_executable)
+        self.button_browse_save.clicked.connect(self.browse_save)
+        self.button_patch.clicked.connect(self.patch_game)
 
-                # get selected patchers and output type
-                for k, v in values.items():
-                    if k.startswith("patcher_") and v:
-                        selected_patchers.append(k[8:])
-                    if k.startswith("save_type_") and v:
-                        output_type = k[10:]
+    def browse_executable(self):
+        file_dialog = QFileDialog()
+        file_dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
+        file_dialog.setNameFilter("Balatro executable (*.exe)")
+        if file_dialog.exec():
+            self.edit_executable_path.setText(file_dialog.selectedFiles()[0])
 
-                # check if the executable exists
-                if not executable_path.exists():
-                    sg.PopupError("Executable not found.", title="File not found")
-                    continue
-                if output_type not in love2d_helper.VALID_OUTPUT_TYPES:
-                    sg.PopupError(
-                        f'Invalid output type "{output_type}".\n'
-                        f'Available output types: "{", ".join(love2d_helper.VALID_OUTPUT_TYPES)}',
-                        title="Invalid type",
-                    )
-                    continue
+    def browse_save(self):
+        file_dialog = QFileDialog()
+        file_dialog.setFileMode(QFileDialog.FileMode.AnyFile)
+        file_dialog.setNameFilter(
+            "Executable file (*.exe);;Game only (*.love);;All files (*.*)"
+        )
+        file_dialog.setDefaultSuffix("exe")
+        if file_dialog.exec():
+            self.edit_save_path.setText(file_dialog.selectedFiles()[0])
 
-                # apply patchers
-                patchers.patch_executable(
-                    executable_path, output_path, selected_patchers, output_type
-                )
+    def patch_game(self):
+        if not self.edit_executable_path.text() or not self.edit_save_path.text():
+            QMessageBox.critical(
+                self, "Missing data", "Please select path."
+            )
+            return
 
-                sg.Popup("Patching complete", title="Success")
+        executable_path = Path(self.edit_executable_path.text())
+        output_path = Path(self.edit_save_path.text())
+        selected_patchers = [i.text() for i in self.checkbox_patchers if i.isChecked()]
+        output_type = [i.text() for i in self.checkbox_output_types if i.isChecked()][0]
 
-        window.close()
+        if not executable_path.exists():
+            QMessageBox.critical(
+                self, "File not found", "Selected Balatro.exe not found."
+            )
+            return
+
+        patchers.patch_executable(
+            executable_path, output_path, selected_patchers, output_type
+        )
+
+        QMessageBox.information(self, "Success", "Patching complete.")
 
 
 def run():
-    # dpi aware
-    if int(platform.release()) >= 8:
-        ctypes.windll.shcore.SetProcessDpiAwareness(True)
-    Window().show()
+    app = QApplication([])
+    window = Window()
+    window.show()
+    sys.exit(app.exec())

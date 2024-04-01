@@ -1,2 +1,2 @@
 requests
-pysimplegui
+PySide6

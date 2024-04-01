@@ -163,7 +163,7 @@ def patch_executable(
         executable_data = love2d_helper.get_game_executable(executable_path)
         with output_path.open("wb") as output_file:
             output_file.write(executable_data + love_data)
-    elif output_type in ["love", "zip"]:
+    elif output_type == "love":
         with output_path.open("wb") as output_file:
             output_file.write(love_data)
 
