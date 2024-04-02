@@ -50,8 +50,6 @@ def patcher():
             f'Available output types: "{", ".join(love2d_helper.VALID_OUTPUT_TYPES)}'
         )
 
-    love_data = love2d_helper.get_game_data(executable_path)
-
     # apply patchers
     patchers.patch_executable(
         executable_path, output_path, selected_patchers, output_type

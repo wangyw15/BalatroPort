@@ -1,9 +1,12 @@
+import re
 import zipfile
 from datetime import datetime
 from hashlib import md5
 from os import PathLike
 from pathlib import Path
 from typing import IO
+
+import requests
 
 
 def random_string(length: int = 10) -> str:
@@ -61,8 +64,23 @@ def uncompress(
         zip_file.extractall(directory)
 
 
+def get_latest_release_version(repo: str) -> str:
+    """
+    Get the latest release version of the repository.
+    :param repo: repository name
+    :return: latest release version
+    """
+    url = f"https://github.com/{repo}/releases/latest"
+    response = requests.get(url)
+    response.raise_for_status()
+    if result := re.search(r"tag/([0-9.]+)", response.url):
+        return result.group(1)
+    return ""
+
+
 __all__ = [
     "random_string",
     "compress",
     "uncompress",
+    "get_latest_release_version",
 ]
