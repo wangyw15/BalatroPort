@@ -80,18 +80,23 @@ def patch_extracted_game(extracted_dir: Path | str, patcher_name: str) -> None:
 
 
 def patch_game_data(
-    game_data: bytes, selected_patchers: list[str] | None = None
+    game_data: bytes, working_dir: Path | str, selected_patchers: list[str] | None = None
 ) -> bytes:
     """
     Patch the game to run independently.
+    :param working_dir: working directory
     :param game_data: game data
     :param selected_patchers: patchers to use
     """
     if selected_patchers is None:
         selected_patchers = []
 
-    working_dir = Path(f"balatro_{util.random_string()}")
-    working_dir.mkdir(exist_ok=False)
+    if isinstance(working_dir, str):
+        working_dir = Path(working_dir)
+
+    if not working_dir.exists():
+        working_dir.mkdir(exist_ok=True)
+
     uncompressed_game_dir = working_dir / "game"
     uncompressed_game_dir.mkdir(exist_ok=False)
 
@@ -108,7 +113,6 @@ def patch_game_data(
         util.compress(uncompressed_game_dir, love_data_io)
         patched_game_data = love_data_io.getvalue()
 
-    shutil.rmtree(working_dir)
     return patched_game_data
 
 
@@ -117,9 +121,13 @@ def patch_executable(
     output_path: Path | str,
     selected_patchers: list[str] | None = None,
     output_type: str = "exe",
+    working_dir: Path | str | None = None,
+    delete_working_dir: bool = True,
 ) -> None:
     """
     Patch the game to run independently.
+    :param delete_working_dir: delete the working directory after patching
+    :param working_dir: working directory
     :param executable_path: executable path
     :param output_path: output path
     :param selected_patchers: patchers to use
@@ -127,6 +135,11 @@ def patch_executable(
     """
     if selected_patchers is None:
         selected_patchers = []
+
+    if working_dir is None:
+        working_dir = Path(f"balatro_{util.random_string()}")
+    if isinstance(working_dir, str):
+        working_dir = Path(working_dir)
 
     if isinstance(executable_path, str):
         executable_path = Path(executable_path)
@@ -145,7 +158,7 @@ def patch_executable(
 
     # apply patchers
     if selected_patchers:
-        love_data = patch_game_data(love_data, selected_patchers)
+        love_data = patch_game_data(love_data, working_dir, selected_patchers)
 
     if output_type == "exe":
         executable_data = love2d_helper.get_game_executable(executable_path)
@@ -154,6 +167,9 @@ def patch_executable(
     elif output_type == "love":
         with output_path.open("wb") as output_file:
             output_file.write(love_data)
+
+    if delete_working_dir:
+        shutil.rmtree(working_dir, ignore_errors=True)
 
 
 __all__ = ["patch_executable", "patch_game_data", "get_patcher_names"]
