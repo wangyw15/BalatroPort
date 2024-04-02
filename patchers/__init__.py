@@ -1,12 +1,23 @@
 import shutil
-from importlib import import_module
 from io import BytesIO
 from os import PathLike
 from pathlib import Path
-from pkgutil import iter_modules
 from types import ModuleType
 
 from libs import util, love2d_helper
+from . import (
+    android,
+    enable_debug,
+    remove_steam,
+    steamodded,
+)
+
+_patchers: dict[str, ModuleType] = {
+    "android": android,
+    "enable_debug": enable_debug,
+    "remove_steam": remove_steam,
+    "steamodded": steamodded,
+}
 
 
 def get_patcher_names() -> list[str]:
@@ -14,26 +25,7 @@ def get_patcher_names() -> list[str]:
     Get patcher names.
     :return: list of patcher names
     """
-    ret: list[str] = []
-    for _, module_name, _ in iter_modules([str(Path(__file__).parent)]):
-        if module_name.startswith("patcher_"):
-            ret.append(module_name[8:])
-    return ret
-
-
-def get_patchers() -> dict[str, ModuleType]:
-    """
-    Get patchers.
-    :return: dict with patcher name as key and patcher module as value
-    """
-    ret: dict[str, ModuleType] = {}
-    for _, module_name, _ in iter_modules([str(Path(__file__).parent)]):
-        if module_name.startswith("patcher_"):
-            current_patcher = import_module(
-                f"{Path(__file__).parent.name}.{module_name}"
-            )
-            ret[module_name[8:]] = current_patcher
-    return ret
+    return list(_patchers.keys())
 
 
 def get_patches(
@@ -83,10 +75,9 @@ def patch_extracted_game(working_dir: Path | str, patcher_name: str) -> None:
     if isinstance(working_dir, str):
         working_dir = Path(working_dir)
 
-    patchers = get_patchers()
-    if patcher_name not in patchers:
+    if patcher_name not in _patchers:
         raise ValueError(f"Unknown patcher: {patcher_name}")
-    patches = get_patches(patchers[patcher_name])
+    patches = get_patches(_patchers[patcher_name])
     for patcher_target, patcher in patches.items():
         patch_file(working_dir / "game" / patcher_target, patcher, working_dir)
 
