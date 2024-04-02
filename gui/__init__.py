@@ -6,29 +6,43 @@ from PySide6.QtWidgets import (
     QGridLayout,
     QFileDialog,
     QMessageBox,
-    QFrame,
+    QWidget,
 )
 from qfluentwidgets import (
-    FluentWindow,
+    MSFluentWindow,
     PushButton,
-    RadioButton,
     CheckBox,
     LineEdit,
     StrongBodyLabel,
     FluentIcon,
     InfoBarIcon,
     TeachingTip,
+    OptionsSettingCard,
+    OptionsConfigItem,
+    OptionsValidator,
+    QConfig,
 )
 
 import patchers
 from libs import love2d_helper
 
 
-class PatcherWidget(QFrame):
+class Config(QConfig):
+    outputType = OptionsConfigItem(
+        "Patcher",
+        "OutputType",
+        love2d_helper.VALID_OUTPUT_TYPES[0],
+        OptionsValidator(love2d_helper.VALID_OUTPUT_TYPES),
+        restart=True,
+    )
+
+
+class PatcherWidget(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.setObjectName("Patcher")
+        self.config = Config()
 
         # widgets
         self.layout = QGridLayout(self)
@@ -38,17 +52,11 @@ class PatcherWidget(QFrame):
         self.button_browse_save = PushButton("Browse", self)
         self.button_patch = PushButton("Patch", self)
         self.checkbox_patchers = []
-        self.checkbox_output_types = []
 
         # layout
         for i, patcher_name in enumerate(patchers.get_patcher_names()):
             self.checkbox_patchers.append(CheckBox(patcher_name, self))
             self.layout.addWidget(self.checkbox_patchers[i], 1, i)
-        for i, output_type in enumerate(love2d_helper.VALID_OUTPUT_TYPES):
-            self.checkbox_output_types.append(RadioButton(output_type, self))
-            self.layout.addWidget(self.checkbox_output_types[i], 5, i)
-            if i == 0:
-                self.checkbox_output_types[i].setChecked(True)
 
         self.layout.addWidget(
             StrongBodyLabel("Select patchers", self), 0, 0, 1, self.layout.columnCount()
@@ -66,17 +74,24 @@ class PatcherWidget(QFrame):
         self.layout.addWidget(
             self.button_browse_executable, 3, self.layout.columnCount() - 1
         )
-        self.layout.addWidget(
-            StrongBodyLabel("Save type", self), 4, 0, 1, self.layout.columnCount()
+        self.options_card_output_type = OptionsSettingCard(
+            icon=FluentIcon.SAVE,
+            configItem=self.config.outputType,
+            title="Output type",
+            content="Select the type of output file you want to generate.",
+            texts=love2d_helper.VALID_OUTPUT_TYPES,
         )
         self.layout.addWidget(
-            StrongBodyLabel("Path to save", self), 6, 0, 1, self.layout.columnCount()
+            self.options_card_output_type, 4, 0, 1, self.layout.columnCount()
         )
         self.layout.addWidget(
-            self.edit_save_path, 7, 0, 1, self.layout.columnCount() - 1
+            StrongBodyLabel("Path to save", self), 5, 0, 1, self.layout.columnCount()
         )
-        self.layout.addWidget(self.button_browse_save, 7, self.layout.columnCount() - 1)
-        self.layout.addWidget(self.button_patch, 8, 0, 1, self.layout.columnCount())
+        self.layout.addWidget(
+            self.edit_save_path, 6, 0, 1, self.layout.columnCount() - 1
+        )
+        self.layout.addWidget(self.button_browse_save, 6, self.layout.columnCount() - 1)
+        self.layout.addWidget(self.button_patch, 7, 0, 1, self.layout.columnCount())
 
         # signals
         self.button_browse_executable.clicked.connect(self.browse_executable)
@@ -125,7 +140,7 @@ class PatcherWidget(QFrame):
         executable_path = Path(self.edit_executable_path.text())
         output_path = Path(self.edit_save_path.text())
         selected_patchers = [i.text() for i in self.checkbox_patchers if i.isChecked()]
-        output_type = [i.text() for i in self.checkbox_output_types if i.isChecked()][0]
+        output_type = self.config.get(self.config.outputType)
 
         if not executable_path.exists():
             TeachingTip.create(
@@ -145,7 +160,7 @@ class PatcherWidget(QFrame):
         QMessageBox.information(self, "Success", "Patching complete.")
 
 
-class Window(FluentWindow):
+class Window(MSFluentWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Balatro helper")
