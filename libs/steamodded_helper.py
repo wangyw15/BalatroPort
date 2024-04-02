@@ -4,7 +4,7 @@ from zipfile import ZipFile
 
 import requests
 
-import util
+from . import util
 
 
 def download_steamodded(version: str | None = None) -> bytes:
