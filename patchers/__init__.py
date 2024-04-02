@@ -1,6 +1,5 @@
 import shutil
 from io import BytesIO
-from os import PathLike
 from pathlib import Path
 from types import ModuleType
 
@@ -30,7 +29,7 @@ def get_patcher_names() -> list[str]:
 
 def get_patches(
     patcher: ModuleType,
-) -> dict[str, callable([[str, PathLike[str]], str])]:
+) -> dict[str, callable([[str], str])]:
     """
     Get all patch functions from the patcher module.
     "___" is interpreted as /
@@ -38,7 +37,7 @@ def get_patches(
     :param patcher: patcher module
     :return: dict with patcher target file as key and patch function as value
     """
-    ret: dict[str, callable([[str, PathLike[str]], str])] = {}
+    ret: dict[str, callable([[str], str])] = {}
     for member_name, member in patcher.__dict__.items():
         if member_name.startswith("patch_") and callable(member):
             ret[member_name[6:].replace("___", "/").replace("__", ".")] = member
@@ -47,39 +46,37 @@ def get_patches(
 
 def patch_file(
     file_path: Path | str,
-    patch_function: callable([[str, PathLike[str]], str]),
-    working_dir: Path | str,
+    patch_function: callable([[str], str]),
 ) -> None:
     """
     Patch a file using a patch function.
     :param file_path: file to patch
     :param patch_function: patch function
-    :param working_dir: working directory
     """
     if isinstance(file_path, str):
         file_path = Path(file_path)
 
     with file_path.open("r", encoding="utf-8") as f:
         code = f.read()
-    patched_code = patch_function(code, working_dir)
+    patched_code = patch_function(code)
     with file_path.open("w", encoding="utf-8") as f:
         f.write(patched_code)
 
 
-def patch_extracted_game(working_dir: Path | str, patcher_name: str) -> None:
+def patch_extracted_game(extracted_dir: Path | str, patcher_name: str) -> None:
     """
     Patch the game to run independently.
     :param patcher_name: patcher to use
-    :param working_dir: directory to patch
+    :param extracted_dir: directory to patch
     """
-    if isinstance(working_dir, str):
-        working_dir = Path(working_dir)
+    if isinstance(extracted_dir, str):
+        extracted_dir = Path(extracted_dir)
 
     if patcher_name not in _patchers:
         raise ValueError(f"Unknown patcher: {patcher_name}")
     patches = get_patches(_patchers[patcher_name])
     for patcher_target, patcher in patches.items():
-        patch_file(working_dir / "game" / patcher_target, patcher, working_dir)
+        patch_file(extracted_dir / "game" / patcher_target, patcher)
 
 
 def patch_game_data(

@@ -1,8 +1,7 @@
 import re
-from os import PathLike
 
 
-def patch_globals__lua(code: str, working_dir: str | PathLike[str]) -> str:
+def patch_globals__lua(code: str) -> str:
     original_code_lines = code.split("\n")
     patched_code_lines: list[str] = []
 
@@ -37,7 +36,7 @@ def patch_globals__lua(code: str, working_dir: str | PathLike[str]) -> str:
     return "\n".join(patched_code_lines)
 
 
-def patch_conf__lua(code: str, working_dir: str | PathLike[str]) -> str:
+def patch_conf__lua(code: str) -> str:
     original_code_lines = code.split("\n")
     patched_code_lines: list[str] = []
 
@@ -50,7 +49,7 @@ def patch_conf__lua(code: str, working_dir: str | PathLike[str]) -> str:
     return "\n".join(patched_code_lines)
 
 
-def patch_main__lua(code: str, working_dir: str | PathLike[str]) -> str:
+def patch_main__lua(code: str) -> str:
     # force landscape mode
     original_code_lines = code.split("\n")
     patched_code_lines: list[str] = []
@@ -99,23 +98,19 @@ end
     return "\n".join(patched_code_lines)
 
 
-def patch_functions___UI_definitions__lua(
-    code: str, working_dir: str | PathLike[str]
-) -> str:
-    # quit button still raise problems
-    return code
-    # add quit button to the option menu
-    original_code_lines = code.split("\n")
-    patched_code_lines: list[str] = []
-
-    for line in original_code_lines:
-        patched_code_lines.append(line)
-        if re.search(r"UIBox_button.*b_stats", line):
-            patched_code_lines.append(
-                "  local exit_button = UIBox_button{ label = {localize('b_quit_cap')}, button = 'quit', minw = 5}"
-            )
-        elif re.fullmatch(r"\s*credits\s*", line):
-            patched_code_lines[-1] += ","
-            patched_code_lines.append("exit_button")
-
-    return "\n".join(patched_code_lines)
+# def patch_functions___UI_definitions__lua(code: str) -> str:
+#     # add quit button to the option menu
+#     original_code_lines = code.split("\n")
+#     patched_code_lines: list[str] = []
+#
+#     for line in original_code_lines:
+#         patched_code_lines.append(line)
+#         if re.search(r"UIBox_button.*b_stats", line):
+#             patched_code_lines.append(
+#                 "  local exit_button = UIBox_button{ label = {localize('b_quit_cap')}, button = 'quit', minw = 5}"
+#             )
+#         elif re.fullmatch(r"\s*credits\s*", line):
+#             patched_code_lines[-1] += ","
+#             patched_code_lines.append("exit_button")
+#
+#     return "\n".join(patched_code_lines)

@@ -1,8 +1,7 @@
 import re
-from os import PathLike
 
 
-def patch_main__lua(code: str, working_dir: str | PathLike[str]) -> str:
+def patch_main__lua(code: str) -> str:
     """
     Remove the steam API from the code.
     :param code: code to remove the steam API from

@@ -246,4 +246,5 @@ cython_debug/
 *.qm
 
 # Project specified
+assets
 config

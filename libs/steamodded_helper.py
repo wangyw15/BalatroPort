@@ -1,8 +1,9 @@
-from os import PathLike
+import re
+from io import BytesIO
 from pathlib import Path
+from zipfile import ZipFile
 
 import requests
-import re
 
 
 def get_latest_release_version() -> str:
@@ -18,25 +19,36 @@ def get_latest_release_version() -> str:
     return ""
 
 
-def download_steamodded(
-    download_path: str | PathLike[str], version: str | None = None
-) -> None:
+def download_steamodded(version: str | None = None) -> bytes:
     """
     Download the Steamodded repository.
-    :param download_path: path to download the repository to
     :param version: version to download (default: latest)
+    :return: downloaded content
     """
     if not version:
         version = get_latest_release_version()
 
     url = f"https://github.com/Steamopollys/Steamodded/archive/refs/tags/{version}.zip"
 
-    if isinstance(download_path, str):
-        download_path = Path(download_path)
-
     print(f"Downloading Steamodded v{version}...")
     with requests.get(url) as response:
         response.raise_for_status()
+        return response.content
 
-        with download_path.open("wb") as file:
-            file.write(response.content)
+
+def get_code() -> str:
+    directories = ["core", "debug", "loader"]
+    core_file_name = "core.lua"
+    code = ""
+
+    with BytesIO(download_steamodded()) as steamodded_data:
+        with ZipFile(steamodded_data) as steamodded_zip:
+            for filename in steamodded_zip.namelist():
+                filepath = Path(filename)
+                if filepath.parent.name in directories:
+                    with steamodded_zip.open(filename) as file:
+                        if filepath.name == core_file_name:
+                            code = file.read().decode() + "\n" + code
+                        else:
+                            code += file.read().decode() + "\n"
+    return code
