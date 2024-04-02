@@ -242,5 +242,8 @@ cython_debug/
 # Love2D
 *.love
 
+# Qt translation file
+*.qm
+
 # Project specified
 config
