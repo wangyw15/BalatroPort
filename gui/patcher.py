@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from PySide6.QtCore import QCoreApplication
 from PySide6.QtWidgets import (
     QGridLayout,
     QFileDialog,
@@ -23,7 +24,6 @@ from .config import Config
 
 
 class PatcherWidget(QWidget):
-
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.setObjectName("Patcher")
@@ -35,17 +35,25 @@ class PatcherWidget(QWidget):
         # widgets
         self.layout = QGridLayout(self)
         self.edit_executable_path = LineEdit(self)
-        self.button_browse_executable = PushButton("Browse", self)
+        self.button_browse_executable = PushButton(
+            QCoreApplication.translate("Patcher", "Browse"), self
+        )
         self.edit_save_path = LineEdit(self)
-        self.button_browse_save = PushButton("Browse", self)
+        self.button_browse_save = PushButton(
+            QCoreApplication.translate("Patcher", "Browse"), self
+        )
         self.options_card_output_type = OptionsSettingCard(
             icon=FluentIcon.SAVE,
             configItem=self.config.outputType,
-            title="Output type",
-            content="Select the type of output file you want to generate.",
+            title=QCoreApplication.translate("Patcher", "Output type"),
+            content=QCoreApplication.translate(
+                "Patcher", "Select the type of output file you want to generate."
+            ),
             texts=love2d_helper.VALID_OUTPUT_TYPES,
         )
-        self.button_patch = PushButton("Patch", self)
+        self.button_patch = PushButton(
+            QCoreApplication.translate("Patcher", "Patch"), self
+        )
         self.checkbox_patchers = []
 
         # layout
@@ -54,10 +62,18 @@ class PatcherWidget(QWidget):
             self.layout.addWidget(self.checkbox_patchers[i], 1, i)
 
         self.layout.addWidget(
-            StrongBodyLabel("Select patchers", self), 0, 0, 1, self.layout.columnCount()
+            StrongBodyLabel(
+                QCoreApplication.translate("Patcher", "Select patchers"), self
+            ),
+            0,
+            0,
+            1,
+            self.layout.columnCount(),
         )
         self.layout.addWidget(
-            StrongBodyLabel("Select Balatro.exe", self),
+            StrongBodyLabel(
+                QCoreApplication.translate("Patcher", "Select Balatro.exe"), self
+            ),
             2,
             0,
             1,
@@ -70,7 +86,13 @@ class PatcherWidget(QWidget):
             self.button_browse_executable, 3, self.layout.columnCount() - 1
         )
         self.layout.addWidget(
-            StrongBodyLabel("Path to save", self), 4, 0, 1, self.layout.columnCount()
+            StrongBodyLabel(
+                QCoreApplication.translate("Patcher", "Path to save"), self
+            ),
+            4,
+            0,
+            1,
+            self.layout.columnCount(),
         )
         self.layout.addWidget(
             self.edit_save_path, 5, 0, 1, self.layout.columnCount() - 1
@@ -89,7 +111,9 @@ class PatcherWidget(QWidget):
     def browse_executable(self):
         file_dialog = QFileDialog()
         file_dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
-        file_dialog.setNameFilter("Balatro executable (*.exe)")
+        file_dialog.setNameFilter(
+            f'{QCoreApplication.translate("Patcher", "Balatro executable")} (*.exe)'
+        )
         if file_dialog.exec():
             self.edit_executable_path.setText(file_dialog.selectedFiles()[0])
 
@@ -97,7 +121,9 @@ class PatcherWidget(QWidget):
         file_dialog = QFileDialog()
         file_dialog.setFileMode(QFileDialog.FileMode.AnyFile)
         file_dialog.setNameFilter(
-            "Executable file (*.exe);;Game only (*.love);;All files (*.*)"
+            f'{QCoreApplication.translate("Patcher", "Balatro executable")}  (*.exe);;'
+            f'{QCoreApplication.translate("Patcher", "Game only")} (*.love);;'
+            f'{QCoreApplication.translate("Patcher", "All files")} (*.*)'
         )
         file_dialog.setDefaultSuffix("exe")
         if file_dialog.exec():
@@ -107,8 +133,10 @@ class PatcherWidget(QWidget):
         if not self.edit_executable_path.text():
             TeachingTip.create(
                 icon=InfoBarIcon.ERROR,
-                title="No file selected",
-                content="No Balatro.exe selected.",
+                title=QCoreApplication.translate("Patcher", "No file selected"),
+                content=QCoreApplication.translate(
+                    "Patcher", "No Balatro.exe selected."
+                ),
                 target=self.edit_executable_path,
                 parent=self,
                 isClosable=True,
@@ -117,8 +145,8 @@ class PatcherWidget(QWidget):
         if not self.edit_save_path.text():
             TeachingTip.create(
                 icon=InfoBarIcon.ERROR,
-                title="No file selected",
-                content="No save file selected.",
+                title=QCoreApplication.translate("Patcher", "No file selected"),
+                content=QCoreApplication.translate("Patcher", "No save file selected."),
                 target=self.edit_save_path,
                 parent=self,
                 isClosable=True,
@@ -133,8 +161,10 @@ class PatcherWidget(QWidget):
         if not executable_path.exists():
             TeachingTip.create(
                 icon=InfoBarIcon.ERROR,
-                title="File not found",
-                content="Selected Balatro.exe not found.",
+                title=QCoreApplication.translate("Patcher", "File not found"),
+                content=QCoreApplication.translate(
+                    "Patcher", "Selected Balatro.exe not found."
+                ),
                 target=self.button_patch,
                 parent=self,
                 isClosable=True,
@@ -145,4 +175,8 @@ class PatcherWidget(QWidget):
             executable_path, output_path, selected_patchers, output_type
         )
 
-        QMessageBox.information(self, "Success", "Patching complete.")
+        QMessageBox.information(
+            self,
+            QCoreApplication.translate("Patcher", "Success"),
+            QCoreApplication.translate("Patcher", "Patching complete."),
+        )
