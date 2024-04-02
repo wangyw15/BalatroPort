@@ -248,3 +248,5 @@ cython_debug/
 # Project specified
 assets
 config
+build
+*.exe

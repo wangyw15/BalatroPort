@@ -1,6 +1,7 @@
 import sys
 
 from PySide6.QtCore import QCoreApplication, QTranslator, QLocale
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QApplication,
 )
@@ -16,6 +17,7 @@ from .patcher import PatcherWidget
 class Window(MSFluentWindow):
     def __init__(self):
         super().__init__()
+        self.setWindowIcon(QIcon("icon.ico"))
         self.setWindowTitle(QCoreApplication.translate("Window", "Balatro Patcher"))
         self.config = Config()
         self.addSubInterface(
