@@ -50,6 +50,13 @@ class PatcherWidget(QWidget):
         self.button_browse_executable = PushButton("Browse", self)
         self.edit_save_path = LineEdit(self)
         self.button_browse_save = PushButton("Browse", self)
+        self.options_card_output_type = OptionsSettingCard(
+            icon=FluentIcon.SAVE,
+            configItem=self.config.outputType,
+            title="Output type",
+            content="Select the type of output file you want to generate.",
+            texts=love2d_helper.VALID_OUTPUT_TYPES,
+        )
         self.button_patch = PushButton("Patch", self)
         self.checkbox_patchers = []
 
@@ -74,23 +81,16 @@ class PatcherWidget(QWidget):
         self.layout.addWidget(
             self.button_browse_executable, 3, self.layout.columnCount() - 1
         )
-        self.options_card_output_type = OptionsSettingCard(
-            icon=FluentIcon.SAVE,
-            configItem=self.config.outputType,
-            title="Output type",
-            content="Select the type of output file you want to generate.",
-            texts=love2d_helper.VALID_OUTPUT_TYPES,
+        self.layout.addWidget(
+            StrongBodyLabel("Path to save", self), 4, 0, 1, self.layout.columnCount()
         )
         self.layout.addWidget(
-            self.options_card_output_type, 4, 0, 1, self.layout.columnCount()
+            self.edit_save_path, 5, 0, 1, self.layout.columnCount() - 1
         )
+        self.layout.addWidget(self.button_browse_save, 5, self.layout.columnCount() - 1)
         self.layout.addWidget(
-            StrongBodyLabel("Path to save", self), 5, 0, 1, self.layout.columnCount()
+            self.options_card_output_type, 6, 0, 1, self.layout.columnCount()
         )
-        self.layout.addWidget(
-            self.edit_save_path, 6, 0, 1, self.layout.columnCount() - 1
-        )
-        self.layout.addWidget(self.button_browse_save, 6, self.layout.columnCount() - 1)
         self.layout.addWidget(self.button_patch, 7, 0, 1, self.layout.columnCount())
 
         # signals
