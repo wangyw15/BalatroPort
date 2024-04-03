@@ -12,6 +12,7 @@ from qfluentwidgets import (
 
 from .config import Config
 from .patcher import PatcherWidget
+from .apk_packer import ApkPackerWidget
 
 
 class Window(MSFluentWindow):
@@ -25,6 +26,11 @@ class Window(MSFluentWindow):
             PatcherWidget(self),
             FluentIcon.APPLICATION,
             QCoreApplication.translate("Window", "Patcher"),
+        )
+        self.addSubInterface(
+            ApkPackerWidget(self),
+            FluentIcon.SAVE,
+            QCoreApplication.translate("Window", "ApkPacker"),
         )
 
 

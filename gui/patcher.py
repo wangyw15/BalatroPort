@@ -130,6 +130,7 @@ class PatcherWidget(QWidget):
             self.edit_save_path.setText(file_dialog.selectedFiles()[0])
 
     def patch_game(self):
+        self.button_patch.setEnabled(False)
         if not self.edit_executable_path.text():
             TeachingTip.create(
                 icon=InfoBarIcon.ERROR,
@@ -165,7 +166,7 @@ class PatcherWidget(QWidget):
                 content=QCoreApplication.translate(
                     "Patcher", "Selected Balatro.exe not found."
                 ),
-                target=self.button_patch,
+                target=self.edit_executable_path,
                 parent=self,
                 isClosable=True,
             )
@@ -175,6 +176,7 @@ class PatcherWidget(QWidget):
             executable_path, output_path, selected_patchers, output_type
         )
 
+        self.button_patch.setEnabled(True)
         QMessageBox.information(
             self,
             QCoreApplication.translate("Patcher", "Success"),
