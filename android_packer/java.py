@@ -1,11 +1,12 @@
 import argparse
 import subprocess
 from os import PathLike
-from pathlib import Path
+
+from . import assets
 
 
 def get_java_executable() -> str:
-    return str((Path(__file__).parent.parent / "assets" / "jre" / "bin" / "java.exe").absolute())
+    return str((assets.assets_directory / "jre" / "bin" / "java.exe").absolute())
 
 
 def build_jre(jars: list[PathLike[str]], output: PathLike[str]) -> None:
