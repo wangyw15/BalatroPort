@@ -15,7 +15,7 @@ from qfluentwidgets import (
     TeachingTip,
 )
 
-import android_packer
+import apk_packer
 
 
 class ApkPackerWidget(QWidget):
@@ -136,7 +136,7 @@ class ApkPackerWidget(QWidget):
             return
 
         with game_path.open("rb") as f:
-            android_packer.pack_game_apk(f.read(), save_path)
+            apk_packer.pack_game_apk(f.read(), save_path)
 
         self.button_pack.setEnabled(True)
         TeachingTip.create(

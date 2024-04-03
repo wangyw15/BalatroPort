@@ -1,13 +1,28 @@
+# nuitka-project: --enable-plugin=pyside6
+# nuitka-project: --standalone
+# nuitka-project: --onefile
+# nuitka-project: --output-dir=build
+# nuitka-project: --company-name=wangyw15
+# nuitka-project: --file-version=1.1.0
+# nuitka-project: --product-version=1.1.0
 # nuitka-project: --include-data-files={MAIN_DIRECTORY}/icon.ico=icon.ico
+# nuitka-project: --include-data-files={MAIN_DIRECTORY}/i18n/*.qm=i18n/
 # nuitka-project-if: {OS} == "Windows":
 #     nuitka-project: --windows-icon-from-ico=icon.ico
+# nuitka-project-if: __import__("libs.feature").feature.apk_packer_enabled():
+#     nuitka-project: --product-name=BalatroHelperFull
+#     nuitka-project: --output-filename=BalatroHelperFull.exe
+#     nuitka-project: --include-data-dir={MAIN_DIRECTORY}/apk_packer_assets=apk_packer_assets
+# nuitka-project-else:
+#     nuitka-project: --product-name=BalatroHelper
+#     nuitka-project: --output-filename=BalatroHelper.exe
 
 import argparse
 from pathlib import Path
 
-import android_packer
+import apk_packer
 import patchers
-from libs import love2d_helper, game_save_helper
+from libs import love2d_helper, game_save_helper, feature
 
 parser = argparse.ArgumentParser(description="Balatro Helper")
 
@@ -98,11 +113,13 @@ def pack_apk():
         raise FileNotFoundError(f'"{input_path}" not found')
 
     game_content = input_path.read_bytes()
-    android_packer.pack_game_apk(game_content, output_path)
+    apk_packer.pack_game_apk(game_content, output_path)
     print("APK packed successfully.")
 
 
 def main():
+    if feature.apk_packer_enabled():
+        print("Full version")
     if args.subcommand == "patcher":
         patcher()
     elif args.subcommand == "game-save":
@@ -112,6 +129,7 @@ def main():
     else:
         import gui
 
+        print("Loading GUI...")
         gui.run()
 
 

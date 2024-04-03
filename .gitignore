@@ -246,7 +246,7 @@ cython_debug/
 *.qm
 
 # Project specified
-assets
+apk_packer_assets
 config
 build
 *.exe
