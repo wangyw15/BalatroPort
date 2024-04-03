@@ -37,7 +37,7 @@ def get_code() -> str:
         with ZipFile(steamodded_data) as steamodded_zip:
             for filename in steamodded_zip.namelist():
                 filepath = Path(filename)
-                if filepath.parent.name in directories:
+                if filepath.parent.name in directories and filepath.suffix == ".lua":
                     with steamodded_zip.open(filename) as file:
                         if filepath.name == core_file_name:
                             code = file.read().decode() + "\n" + code
