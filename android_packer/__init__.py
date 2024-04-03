@@ -47,8 +47,9 @@ def pack_game_apk(game_content: bytes, save_apk_path: Path | str) -> bytes:
     apk_helper.sign_apk(packed_apk)
 
     # move apk
+    if save_apk_path.exists():
+        save_apk_path.unlink()
     (working_dir / f"{packed_apk.stem}-aligned-debugSigned.apk").rename(save_apk_path)
 
     # cleanup working dir
     shutil.rmtree(working_dir)
-
