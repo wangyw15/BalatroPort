@@ -19,6 +19,7 @@ class Window(MSFluentWindow):
         super().__init__()
         self.setWindowIcon(QIcon("icon.ico"))
         self.setWindowTitle(QCoreApplication.translate("Window", "Balatro Patcher"))
+        self.resize(600, 400)
         self.config = Config()
         self.addSubInterface(
             PatcherWidget(self),
