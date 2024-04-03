@@ -1,3 +1,7 @@
+# nuitka-project: --include-data-files={MAIN_DIRECTORY}/icon.ico=icon.ico
+# nuitka-project-if: {OS} == "Windows":
+#     nuitka-project: --windows-icon-from-ico=icon.ico
+
 import argparse
 from pathlib import Path
 
