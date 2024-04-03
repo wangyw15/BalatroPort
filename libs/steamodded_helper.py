@@ -7,16 +7,20 @@ import requests
 from . import util
 
 
-def download_steamodded(version: str | None = None) -> bytes:
+def download_steamodded(version: str | None = None, use_mirror: bool = False) -> bytes:
     """
     Download the Steamodded repository.
     :param version: version to download (default: latest)
+    :param use_mirror: use a mirror website to download the repository
     :return: downloaded content
     """
     if not version:
         version = util.get_latest_release_version("Steamopollys/Steamodded")
 
-    url = f"https://github.com/Steamopollys/Steamodded/archive/refs/tags/{version}.zip"
+    if use_mirror:
+        url = f"https://ghproxy.net/github.com/Steamopollys/Steamodded/archive/refs/tags/{version}.zip"
+    else:
+        url = f"https://github.com/Steamopollys/Steamodded/archive/refs/tags/{version}.zip"
 
     print(f"Downloading Steamodded v{version}...")
     with requests.get(url) as response:
@@ -29,7 +33,7 @@ def get_code() -> str:
     core_file_name = "core.lua"
     code = ""
 
-    with BytesIO(download_steamodded()) as steamodded_data:
+    with BytesIO(download_steamodded(use_mirror=True)) as steamodded_data:
         with ZipFile(steamodded_data) as steamodded_zip:
             for filename in steamodded_zip.namelist():
                 filepath = Path(filename)
