@@ -33,14 +33,23 @@ class ApkPackerWidget(QWidget):
             QCoreApplication.translate("ApkPacker", "Browse"), self
         )
         self.button_pack = PushButton(
-            QCoreApplication.translate("ApkPacker", "Pack (need some time, please wait)"), self
+            QCoreApplication.translate(
+                "ApkPacker", "Pack (need some time, please wait)"
+            ),
+            self,
         )
 
         self.layout.addWidget(
             StrongBodyLabel(
-                QCoreApplication.translate("ApkPacker", "Path to packed game (game.love)"), self
+                QCoreApplication.translate(
+                    "ApkPacker", "Path to packed game (game.love)"
+                ),
+                self,
             ),
-            0, 0, 1, 3,
+            0,
+            0,
+            1,
+            3,
         )
         self.layout.addWidget(self.edit_game_path, 1, 0, 1, 2)
         self.layout.addWidget(self.button_browse_game, 1, 2)
@@ -48,7 +57,10 @@ class ApkPackerWidget(QWidget):
             StrongBodyLabel(
                 QCoreApplication.translate("ApkPacker", "Save apk path"), self
             ),
-            2, 0, 1, 3,
+            2,
+            0,
+            1,
+            3,
         )
         self.layout.addWidget(self.edit_save_path, 3, 0, 1, 2)
         self.layout.addWidget(self.button_browse_save, 3, 2)

@@ -80,7 +80,9 @@ def patch_extracted_game(extracted_dir: Path | str, patcher_name: str) -> None:
 
 
 def patch_game_data(
-    game_data: bytes, working_dir: Path | str, selected_patchers: list[str] | None = None
+    game_data: bytes,
+    working_dir: Path | str,
+    selected_patchers: list[str] | None = None,
 ) -> bytes:
     """
     Patch the game to run independently.

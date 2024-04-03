@@ -5,7 +5,9 @@ from libs import util
 from . import apk_helper, assets, downloader, java
 
 
-def pack_game_apk(game_content: bytes, save_apk_path: Path | str, delete_working_dir: bool = True) -> bytes:
+def pack_game_apk(
+    game_content: bytes, save_apk_path: Path | str, delete_working_dir: bool = True
+) -> bytes:
     if isinstance(save_apk_path, str):
         save_apk_path = Path(save_apk_path)
 
@@ -20,9 +22,13 @@ def pack_game_apk(game_content: bytes, save_apk_path: Path | str, delete_working
     # update AndroidManifest.xml
     with (assets.assets_directory / "AndroidManifest.xml").open("r") as manifest_file:
         manifest_content: str = manifest_file.read()
-        manifest_content = manifest_content.replace("${GamePackageName}", "com.anyone.balatro")
+        manifest_content = manifest_content.replace(
+            "${GamePackageName}", "com.anyone.balatro"
+        )
         manifest_content = manifest_content.replace("${GameVersionCode}", "1")
-        manifest_content = manifest_content.replace("${GameVersionSemantic}", "CUSTOM_BUILD")
+        manifest_content = manifest_content.replace(
+            "${GameVersionSemantic}", "CUSTOM_BUILD"
+        )
         manifest_content = manifest_content.replace("${GameName}", "Balatro")
         manifest_content = manifest_content.replace("${ORIENTATION}", "sensorLandscape")
     with (unpacked_dir / "AndroidManifest.xml").open("w") as manifest_file:
@@ -37,7 +43,9 @@ def pack_game_apk(game_content: bytes, save_apk_path: Path | str, delete_working
     for resolution in target_resolution:
         icon_path = unpacked_dir / "res" / f"drawable-{resolution}" / "love.png"
         with icon_path.open("wb") as icon_file:
-            icon_file.write((assets.assets_directory / "icons" / f"{resolution}.png").read_bytes())
+            icon_file.write(
+                (assets.assets_directory / "icons" / f"{resolution}.png").read_bytes()
+            )
 
     # repack apk
     packed_apk = working_dir / "balatro_unsigned.apk"

@@ -9,8 +9,10 @@ def download_embed_apk(version: str | None = None) -> bytes:
     if not version:
         version = util.get_latest_release_version("love2d/love-android")
     download_version = re.compile(r"[^.0-9]").sub("", version)
-    url = (f"https://github.com/love2d/love-android/releases/"
-           f"download/{version}/love-{download_version}-android-embed.apk")
+    url = (
+        f"https://github.com/love2d/love-android/releases/"
+        f"download/{version}/love-{download_version}-android-embed.apk"
+    )
 
     print(f"Downloading love2d-android v{version}...")
     with requests.get(url) as response:
