@@ -5,6 +5,7 @@
 import argparse
 from pathlib import Path
 
+import android_packer
 import patchers
 from libs import love2d_helper, game_save_helper
 
@@ -15,6 +16,8 @@ subparsers = parser.add_subparsers(
 )
 
 patcher_parser = subparsers.add_parser("patcher", help="Patcher")
+patcher_parser.add_argument("input", help="Path to Balatro.exe", type=str)
+patcher_parser.add_argument("output", help="Output path", type=str)
 patcher_parser.add_argument(
     "-p",
     "--patcher",
@@ -24,8 +27,6 @@ patcher_parser.add_argument(
     required=False,
     nargs="+",
 )
-patcher_parser.add_argument("input", help="Path to Balatro.exe", type=str)
-patcher_parser.add_argument("output", help="Output path", type=str)
 
 game_save_parser = subparsers.add_parser("game-save", help="Game save helper")
 game_save_parser.add_argument(
@@ -36,6 +37,10 @@ game_save_parser.add_argument(
 )
 game_save_parser.add_argument("input", help="Path to the save file", type=str)
 game_save_parser.add_argument("output", help="Path to the output file", type=str)
+
+pack_apk_parser = subparsers.add_parser("pack-apk", help="Pack APK")
+pack_apk_parser.add_argument("input", help="Path to the game.love", type=str)
+pack_apk_parser.add_argument("output", help="Path to the output APK", type=str)
 
 args = parser.parse_args()
 
@@ -85,11 +90,25 @@ def game_save():
                 fo.write(compressed)
 
 
+def pack_apk():
+    input_path = Path(args.input)
+    output_path = Path(args.output)
+
+    if not input_path.exists():
+        raise FileNotFoundError(f'"{input_path}" not found')
+
+    game_content = input_path.read_bytes()
+    android_packer.pack_game_apk(game_content, output_path)
+    print("APK packed successfully.")
+
+
 def main():
     if args.subcommand == "patcher":
         patcher()
     elif args.subcommand == "game-save":
         game_save()
+    elif args.subcommand == "pack-apk":
+        pack_apk()
     else:
         import gui
 
