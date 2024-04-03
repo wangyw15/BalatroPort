@@ -35,6 +35,7 @@ class Window(MSFluentWindow):
 
 
 def run():
+    print("Loading GUI...")
     app = QApplication([])
 
     # language translation

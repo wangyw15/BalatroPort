@@ -127,8 +127,11 @@ class ApkPackerWidget(QWidget):
             android_packer.pack_game_apk(f.read(), save_path)
 
         self.button_pack.setEnabled(True)
-        QMessageBox.information(
-            self,
-            QCoreApplication.translate("ApkPacker", "Success"),
-            QCoreApplication.translate("ApkPacker", "Packing complete."),
+        TeachingTip.create(
+            icon=InfoBarIcon.SUCCESS,
+            title=QCoreApplication.translate("ApkPacker", "Success"),
+            content=QCoreApplication.translate("ApkPacker", "Packing complete."),
+            target=self.button_pack,
+            parent=self,
+            isClosable=True,
         )

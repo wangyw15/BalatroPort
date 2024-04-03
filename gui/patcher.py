@@ -177,8 +177,11 @@ class PatcherWidget(QWidget):
         )
 
         self.button_patch.setEnabled(True)
-        QMessageBox.information(
-            self,
-            QCoreApplication.translate("Patcher", "Success"),
-            QCoreApplication.translate("Patcher", "Patching complete."),
+        TeachingTip.create(
+            icon=InfoBarIcon.SUCCESS,
+            title=QCoreApplication.translate("Patcher", "Success"),
+            content=QCoreApplication.translate("Patcher", "Patching complete."),
+            target=self.button_patch,
+            parent=self,
+            isClosable=True,
         )

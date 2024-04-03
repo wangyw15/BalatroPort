@@ -5,7 +5,7 @@ from libs import util
 from . import apk_helper, assets, downloader, java
 
 
-def pack_game_apk(game_content: bytes, save_apk_path: Path | str) -> bytes:
+def pack_game_apk(game_content: bytes, save_apk_path: Path | str, delete_working_dir: bool = True) -> bytes:
     if isinstance(save_apk_path, str):
         save_apk_path = Path(save_apk_path)
 
@@ -52,4 +52,7 @@ def pack_game_apk(game_content: bytes, save_apk_path: Path | str) -> bytes:
     (working_dir / f"{packed_apk.stem}-aligned-debugSigned.apk").rename(save_apk_path)
 
     # cleanup working dir
-    shutil.rmtree(working_dir)
+    if delete_working_dir:
+        shutil.rmtree(working_dir)
+
+    print("Apk pack completed")

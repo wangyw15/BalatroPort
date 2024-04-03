@@ -171,5 +171,7 @@ def patch_executable(
     if delete_working_dir:
         shutil.rmtree(working_dir, ignore_errors=True)
 
+    print("Patch completed")
+
 
 __all__ = ["patch_executable", "patch_game_data", "get_patcher_names"]
